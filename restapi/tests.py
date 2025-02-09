@@ -1,5 +1,6 @@
 from django.test import TestCase
 from restapi import models
+from django.urls import reverse
 
 # Create your tests here.
 class TestModels(TestCase):
