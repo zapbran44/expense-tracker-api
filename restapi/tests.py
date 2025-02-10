@@ -83,3 +83,37 @@ class TestViews(TestCase):
         )
         self.assertEqual(204, res.status_code)
         self.assertFalse(models.Expense.objects.filter(pk=expense.id).exists())
+
+    def test_list_expense_filter_by_merchant(self):
+        amazon_expense = models.Expense.objects.create(
+            amount=100, merchant="amazon", description="sunglasses", category="fashion"
+        )
+        ebay_expense = models.Expense.objects.create(
+            amount=200, merchant="ebay", description="watch", category="fashion"
+        )
+        url = "/api/expenses?merchant=amazon"
+        res = self.client.get(url, format="json")
+        self.assertEqual(200, res.status_code)
+        json_res = res.json()
+        self.assertEqual(1, len(json_res))
+        self.assertEqual(amazon_expense.id, json_res[0]["id"])
+        self.assertEqual(amazon_expense.amount, json_res[0]["amount"])
+        self.assertEqual(amazon_expense.merchant, json_res[0]["merchant"])
+        self.assertEqual(amazon_expense.description, json_res[0]["description"])
+        self.assertEqual(amazon_expense.category, json_res[0]["category"])
+
+    def test_list_expense_filter_by_category(self):
+        amazon_expense = models.Expense.objects.create(
+            amount=100, merchant="amazon", description="sunglasses", category="fashion"
+        )
+        ebay_expense = models.Expense.objects.create(
+            amount=200, merchant="ebay", description="watch", category="fashion"
+        )
+        groceries_expense = models.Expense.objects.create(
+            amount=30, merchant="walmart", description="beer", category="groceries"
+        )
+        url = "/api/expenses?category=fashion"
+        res = self.client.get(url, format="json")
+        self.assertEqual(200, res.status_code)
+        json_res = res.json()
+        self.assertEqual(2, len(json_res))
